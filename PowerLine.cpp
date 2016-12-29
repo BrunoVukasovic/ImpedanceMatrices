@@ -3,7 +3,7 @@
 #include <math.h>
 #define pi 3.14159265
 
-float **CreateNovaMatrica2(float **, float, float);
+float **CreatematEkviFazVodZaPotPrepletenVod(float **, float, float);
 float **SubtractMatrix(float **, float **, int, int);
 float **MultiplyMatrixAndFloatNumber(float **, int, int, float);
 float **MultiplyOneDimensionalMatrix(float *, float*, int, int);
@@ -97,7 +97,7 @@ int main ()
 
 
 	Dab = sqrt ( pow(udaljenost_a+udaljenost_b, 2) + pow(visina_b - visina_a, 2) );
-	printf ("Udaljenost vodica a i b (Dab) je %f\n", Dab) ;
+	printf ("\nUdaljenost vodica a i b (Dab) je %f\n", Dab) ;
 
 	Dac = sqrt ( pow(udaljenost_a+udaljenost_c, 2) + pow(visina_a - visina_c, 2) );
 	printf ("Udaljenost vodica a i c (Dac) je %f\n", Dac) ;
@@ -112,7 +112,7 @@ int main ()
 	printf ("Udaljenost vodica b i n (Dbn) je %f\n", Dbn) ;
 
 	Dcn = sqrt ( pow(udaljenost_c, 2) + pow(visina_n - visina_c, 2) );
-	printf ("Udaljenost vodica c i n (Dcn) je %f\n", Dcn) ;
+	printf ("Udaljenost vodica c i n (Dcn) je %f\n\n", Dcn) ;
 	
 	
 	Xaa=0.1445*log10 ((658/rf)*sqrt(ro_zemlje/f)) + Xu;
@@ -131,16 +131,16 @@ int main ()
 	printf ("Xbc = Xcb = %f\n", Xbc);
 	printf ("Xan = Xna = %f\n", Xan);
 	printf ("Xbn = Xnb = %f\n", Xbn);
-	printf ("Xcn = Xnc = %f\n", Xcn);
+	printf ("Xcn = Xnc = %f\n\n", Xcn);
 
-	float X_reakt_vodica[4][4]= { 
+	float X_reakt_vodica[4][4]= {     // Matrica reaktancija vodica
 	{Xaa,Xab,Xac,Xan},
 	{Xab,Xaa,Xbc,Xbn},
 	{Xac,Xbc,Xaa,Xcn},
 	{Xan,Xbn,Xcn,Xnn} 
 	};
 	
-	printf("Matrica X_reakt_vodica\n");
+	printf("Matrica reaktancija vodica\n");
 	for(i=0;i<4; ++i){
 		for(j=0;j<4; ++j){
 			printf("%3f\t", X_reakt_vodica[i][j]);
@@ -170,33 +170,33 @@ int main ()
 	element4 = GetElementFromMatrix(ptr_X_reakt_vodica, 3, 3);
 	element4=1/element4;
 	
-	float **ptr_novaMatrica=NULL;
-	ptr_novaMatrica=SubtractMatrix(ptr_element1, MultiplyMatrixAndFloatNumber(MultiplyOneDimensionalMatrix(ptr_element2, ptr_element3, 3, 3), 3, 3, element4), 3, 3);
+	float **ptr_matEkviFazVod=NULL;		// Matrica ekvivalentnih faznih vodica
+	ptr_matEkviFazVod=SubtractMatrix(ptr_element1, MultiplyMatrixAndFloatNumber(MultiplyOneDimensionalMatrix(ptr_element2, ptr_element3, 3, 3), 3, 3, element4), 3, 3);
 	
-	printf("Matrica nova Matrica\n");
+	printf("\nMatrica ekvivalentnih faznih vodica\n");
 	for(i=0;i<3; ++i){
 		for(j=0;j<3; ++j){
-			printf("%3f\t", ptr_novaMatrica[i][j]);
+			printf("%3f\t", ptr_matEkviFazVod[i][j]);
 		}
 		printf("\n");
 	}
 	
 	float Xs=0.0, Xm=0.0;
-	Xs = CalculateXs(ptr_novaMatrica);
-	Xm = CalculateXm(ptr_novaMatrica);
+	Xs = CalculateXs(ptr_matEkviFazVod);
+	Xm = CalculateXm(ptr_matEkviFazVod);
 	
-	float **ptr_novaMatrica2=NULL;
-	ptr_novaMatrica2=CreateNovaMatrica2(ptr_novaMatrica, Xs, Xm);
+	float **matEkviFazVodZaPotPrepletenVod=NULL;	// Matrica ekvivalentnih faznih vodica za potpuno prepleten vod
+	matEkviFazVodZaPotPrepletenVod=CreatematEkviFazVodZaPotPrepletenVod(ptr_matEkviFazVod, Xs, Xm);
 	
-	printf("Matrica nova Matrica 2\n");
+	printf("\nMatrica ekvivalentnih faznih vodica za potpuno prepleten vod\n");
 	for(i=0;i<3; ++i){
 		for(j=0;j<3; ++j){
-			printf("%3f\t", ptr_novaMatrica2[i][j]);
+			printf("%3f\t", matEkviFazVodZaPotPrepletenVod[i][j]);
 		}
 		printf("\n");
 	}
 	
-	PrintXoXiXd(Xs, Xm);
+	PrintXoXiXd(Xs, Xm);	// Nulta, direktna i inverzna reaktancija
 	
 	float Dm=0.0;
 	Dm = CalculateDm(Dab, Dac, Dbc);
@@ -204,9 +204,9 @@ int main ()
 	float Ld=0.0;
 	Ld = CalculateLd(Dm, CalculateDs(rf));
 	
-	float Xd=0.0;
+	float Xd=0.0;	// Pogonska (direktna) reaktancija dobivena metodom SGU
 	Xd = CalculateXd(Ld);
-	PrintXd(Xd);
+	PrintXd(Xd);	
 	
 	return 0;
 }
@@ -228,47 +228,49 @@ float CalculateXd(float Ld){
 }
 
 void PrintXd(float Xd){
+	printf("Pogonska (direktna) reaktancija dobivena metodom SGU\n");
 	printf("Xd = w * Ld = 2 * pi * 50 * Ld = %3f\n", Xd);
 }
 
 void PrintXoXiXd(float Xs, float Xm){
 	
+	printf("\nNulta, direktna i inverzna reaktancija\n");
 	printf("Xo = Xs + 2Xm = %3f\n", (Xs + 2*Xm));
-	printf("Xi = Xd = Xs - Xm = %3f\n", (Xs - Xm));
+	printf("Xi = Xd = Xs - Xm = %3f\n\n", (Xs - Xm));
 }
 
-float CalculateXs(float **ptr_novaMatrica){
+float CalculateXs(float **ptr_matEkviFazVod){
 	float Xs=0.0;
-	Xs = ( GetElementFromMatrix(ptr_novaMatrica, 0, 0) + GetElementFromMatrix(ptr_novaMatrica, 1, 1) + GetElementFromMatrix(ptr_novaMatrica, 2, 2) ) / 3;
+	Xs = ( GetElementFromMatrix(ptr_matEkviFazVod, 0, 0) + GetElementFromMatrix(ptr_matEkviFazVod, 1, 1) + GetElementFromMatrix(ptr_matEkviFazVod, 2, 2) ) / 3;
 	return Xs;
 }
 
-float CalculateXm(float **ptr_novaMatrica){
+float CalculateXm(float **ptr_matEkviFazVod){
 	float Xm=0.0;
-	Xm = ( GetElementFromMatrix(ptr_novaMatrica, 0, 1) + GetElementFromMatrix(ptr_novaMatrica, 0, 2) + GetElementFromMatrix(ptr_novaMatrica, 1, 2) ) / 3;
+	Xm = ( GetElementFromMatrix(ptr_matEkviFazVod, 0, 1) + GetElementFromMatrix(ptr_matEkviFazVod, 0, 2) + GetElementFromMatrix(ptr_matEkviFazVod, 1, 2) ) / 3;
 	return Xm;
 }
 
-float **CreateNovaMatrica2(float **ptr_novaMatrica, float Xs, float Xm){
+float **CreatematEkviFazVodZaPotPrepletenVod(float **ptr_matEkviFazVod, float Xs, float Xm){
 	int i=0, j=0;
-	float **ptr_NovaMatrica2=NULL;
+	float **matEkviFazVodZaPotPrepletenVod=NULL;
 	
-	ptr_NovaMatrica2 = new float*[3];
+	matEkviFazVodZaPotPrepletenVod = new float*[3];
 	
 	for(i=0;i<3; ++i){
-		ptr_NovaMatrica2[i] = new float [3];
+		matEkviFazVodZaPotPrepletenVod[i] = new float [3];
 		
 		for(j=0; j<3; ++j){
 			if(i == j){
-				*(*(ptr_NovaMatrica2 + i) + j) = Xs;
+				*(*(matEkviFazVodZaPotPrepletenVod + i) + j) = Xs;
 			}	
 			else{
-				*(*(ptr_NovaMatrica2 + i) + j) = Xm;
+				*(*(matEkviFazVodZaPotPrepletenVod + i) + j) = Xm;
 			}
 		}
 	}
 	
-	return ptr_NovaMatrica2;
+	return matEkviFazVodZaPotPrepletenVod;
 }
 
 float **SubtractMatrix(float **firstMatrix, float **secondMatrix, int rows, int columns){
